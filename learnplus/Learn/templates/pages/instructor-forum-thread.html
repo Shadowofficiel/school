@@ -1,136 +1,105 @@
 {% extends 'bases/header_instructor.html' %}
+
 {% block content %}
+<div class="mdk-drawer-layout__content page">
+    <div class="container-fluid page__container">
 
-        <!-- Header Layout Content -->
-                <div class="mdk-drawer-layout__content page ">
+        <!-- Breadcrumb -->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'instructor-forum' %}">Forum</a></li>
+            <li class="breadcrumb-item active">{{ forum.titre }}</li>
+        </ol>
 
-                    <div class="container-fluid page__container">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="{% url 'instructor-forum' %}">Forum</a></li>
-                            <li class="breadcrumb-item active">Discussion</li>
-                        </ol>
+        <div class="row">
+            <div class="col-md-8">
 
-                        <div class="row">
-                            <div class="col-md-8">
-                        
-                                <h1 class="h2 mb-2">{{ forum.titre }}</h1>
-                                <p class="text-muted d-flex align-items-center mb-4">
-                                    <a href="{% url 'instructor-forum' %}" class="mr-3">Retour</a>
-                                </p>
-                        
-                                <div class="card card-body">
-                                    <div class="d-flex">
-                                        <a href="#" class="avatar mr-3">
-                                            {% if forum.user.student_user.get_u_type  %}
-                                            <img src="{{ forum.user.student_user.photo.url}}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
-                                            {% elif forum.user.instructor.get_u_type  %}
-                                            <img src="{{ forum.user.instructor.photo.url}}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
-                                            {% endif %}
-                                        </a>
-                                        <div class="flex">
-                                            <p class="d-flex align-items-center mb-2">
-                                                <a href="#" class="text-body mr-2"><strong>{{ forum.user.last_name }}
-                                                        {{ forum.user.first_name }}</strong></a>
-                                                <small class="text-muted">{{ forum.date_add }}</small>
-                                            </p>
-                                            <p>{{ forum.question }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                        
-                                <div class="d-flex mb-4">
-                                    <a href="fixed-student-profile.html" class="avatar mr-3">
-                                        <img src="{{ user.instructor.photo.url }}" alt="people" class="avatar-img rounded-circle">
-                                    </a>
-                                    <div class="flex">
-                                        <div class="form-group">
-                                            <label for="comment" class="form-label">Avez-vous une reponse??</label>
-                                            <textarea class="form-control" name="comment" id="comment" rows="3"
-                                                placeholder="Entrer votre reponse"></textarea>
-                                        </div>
-                                        <button class="btn btn-success">Je reponds</button>
-                                    </div>
-                                </div>
-                                <div class="pt-3">
-                                    <h4>{{ forum.sujet_reponse.count}} Reponse(s)</h4>
-                        
-                                    {% for i in forum.sujet_reponse.all %}
-                        
-                                    <div class="d-flex ml-sm-32pt mt-3 border rounded p-3 bg-light mb-3">
-                                        <a href="#" class="avatar avatar-xs mr-3">
-                                            
-                                            {% if i.user.student_user.get_u_type %}
-                                            <img src="{{ i.user.student_user.photo.url }}" alt="{{ i.user.last_name}}"
-                                                class="avatar-img rounded-circle">
-                                            {% elif i.user.instructor.get_u_type %}
-                                            <img src="{{ i.user.instructor.photo.url }}" alt="{{ i.user.last_name}}" class="avatar-img rounded-circle">
-                                            {% endif %}
-                                                
-                                        </a>
-                                        <div class="flex">
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="text-body"><strong>{{ i.user.last_name}} {{ i.user.first_name}}</strong></a>
-                                                <small class="ml-auto text-muted">{{ i.date_add }}</small>
-                                            </div>
-                                            <p class="mt-1 mb-0 text-black-70">{{ i.reponse }}</p>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                        
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                        
-                                <h4>Autres sujets</h4>
-                                <p class="text-black-70">Certains sujets qui pourraient vous aider.</p>
-                        
-                        
-                        
-                                {% for i in forum.cours.cours_forum.all %}
-                        
-                                {% if i.id != forum.id %}
-                        
-                                <li class="list-group-item forum-thread">
-                                    <div class="media align-items-center">
-                                        <div class="media-left">
-                                            <div class="forum-icon-wrapper">
-                                                <a href="{% url 'forum-thread' i.slug %}" class="forum-thread-icon">
-                                                    <i class="material-icons">description</i>
-                                                </a>
-                                                <a href="#" class="forum-thread-user">
-                                                    {% if i.user.student_user.get_u_type %}
-                                                    <img src="{{ i.user.student_user.photo.url }}" alt="" width="20" class="rounded-circle">                                                    
-                                                    {% elif i.user.instructor.get_u_type %}
-                                                    <img src="{{ i.user.instructor.photo.url }}" alt="" width="20" class="rounded-circle">
-                                                    {% endif %}
-                                                    
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="media-body">
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="text-body"><strong>{{ i.user.last_name }}
-                                                        {{ i.user.first_name }}</strong></a>
-                                                <small class="ml-auto text-muted">{{ i.date_add }}</small>
-                                            </div>
-                                            <a class="text-black-70" href="{% url 'forum-thread' i.slug %}">{{ i.titre }}</a>
-                                        </div>
-                                    </div>
-                                </li>
-                                {% else %}
-                                <div class="alert alert-info" role="alert">
-                                    Il n'y a pas d'autres sujet 😣!!!
-                                </div>
-                        
-                                {% endif %}
-                        
-                                {% endfor %}
-                        
-                            </div>
-                        </div>
-                    </div>
-
+                <!-- Détails du forum -->
+                <div class="mb-4">
+                    <h1 class="h2">{{ forum.titre }}</h1>
+                    <p class="text-muted">{{ forum.question }}</p>
+                    <small class="text-muted d-block mb-3">
+                        Posté par : <strong>{{ forum.user.last_name }} {{ forum.user.first_name }}</strong>, 
+                        le {{ forum.date_add|date:"d M Y à H:i" }}
+                    </small>
+                    
+                    <!-- Bouton pour supprimer le forum -->
+                    <form method="POST" action="{% url 'delete-forum' forum.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Supprimer le sujet</button>
+                    </form>
                 </div>
 
-    {% endblock content %}
+                <!-- Liste des réponses -->
+                <div class="card card-body mb-4">
+                    <h4>{{ forum.sujet_reponse.count }} Réponse(s)</h4>
+                    {% for reponse in forum.sujet_reponse.all %}
+                        <div class="d-flex mb-4">
+                            <!-- Avatar utilisateur -->
+                            <div class="mr-3">
+                                <img src="{{ reponse.user.instructor.photo.url }}" 
+                                     alt="{{ reponse.user.last_name }}" 
+                                     class="avatar-img rounded-circle" 
+                                     width="50">
+                            </div>
+                            <!-- Détails de la réponse -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ reponse.user.last_name }} {{ reponse.user.first_name }}</strong>
+                                    <small class="text-muted">{{ reponse.date_add|date:"d M Y à H:i" }}</small>
+                                </div>
+                                <p class="mb-2">{{ reponse.reponse }}</p>
+                                <!-- Bouton pour supprimer une réponse -->
+                                <form method="POST" action="{% url 'delete-response' reponse.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">Aucune réponse pour l'instant.</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Formulaire pour répondre -->
+                <div class="card card-body">
+                    <h4>Ajouter une réponse</h4>
+                    <form method="POST" action="{% url 'post_reply' forum.slug %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <textarea name="reponse" rows="3" class="form-control" 
+                                      placeholder="Écrivez votre réponse ici..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Répondre</button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- Autres sujets -->
+            <div class="col-md-4">
+                <h4>Autres sujets</h4>
+                <div class="list-group">
+                    {% for sujet in forum.cours.cours_forum.all %}
+                        {% if sujet.id != forum.id %}
+                            <a href="{% url 'instructor-forum-thread' sujet.slug %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ sujet.titre }}</strong>
+                                        <small class="text-muted d-block">{{ sujet.user.last_name }} {{ sujet.user.first_name }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ sujet.date_add|date:"d M Y" }}</small>
+                                </div>
+                            </a>
+                        {% else %}
+                            <div class="alert alert-info mt-2">
+                                Aucun autre sujet disponible.
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

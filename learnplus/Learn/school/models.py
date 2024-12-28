@@ -1,57 +1,21 @@
 from django.db import models
 from django.utils.text import slugify
 from datetime import datetime
+from django.contrib.auth.models import User
 
 
 
 # Create your models here.
-# class Filiere(models.Model):
-#     nom = models.CharField(max_length=255)
-#     date_add = models.DateTimeField(auto_now_add=True)
-#     date_update = models.DateTimeField(auto_now=True)
-#     status = models.BooleanField(default=True)
-
-
-#     class Meta:
-#         verbose_name = 'Filiere'
-#         verbose_name_plural = 'Filieres'
-
-#     def __str__(self):
-#         return self.nom
-
-class Matiere(models.Model):
-    nom = models.CharField(max_length=255)
-    image = models.ImageField(upload_to="images/matiere/", null=True)
-    description = models.TextField(default="Description du cours")
-    date_add = models.DateTimeField(auto_now_add=True)
-    date_update = models.DateTimeField(auto_now=True)
-    status = models.BooleanField(default=True)
-    slug = models.SlugField(unique=True, null=True,  blank=True)
-
-    def save(self, *args, **kwargs):
-        self.slug = '-'.join((slugify(self.nom), slugify(self.date_add)))
-        super(Matiere, self).save(*args, **kwargs)
-    
-
-
-    class Meta:
-        verbose_name = 'Matiere'
-        verbose_name_plural = 'Matieres'
-
-    def __str__(self):
-        return self.nom
-
 class Niveau(models.Model):
     nom = models.CharField(max_length=255)
     date_add = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
     status = models.BooleanField(default=True)
-    slug = models.SlugField(unique=True, null=True,  blank=True)
+    slug = models.SlugField(unique=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.slug = '-'.join((slugify(self.nom), slugify(self.date_add)))
         super(Niveau, self).save(*args, **kwargs)
-
 
     class Meta:
         verbose_name = 'Niveau'
@@ -59,23 +23,64 @@ class Niveau(models.Model):
 
     def __str__(self):
         return self.nom
-
-class Classe(models.Model):
-    niveau = models.ForeignKey(Niveau,on_delete=models.CASCADE,related_name='classe_niveau')
-    numeroClasse = models.IntegerField()
-    # filiere = models.ForeignKey(Filiere,on_delete=models.CASCADE,related_name='classe_filiere',null=True)
+    
+class Filiere(models.Model):
+    nom = models.CharField(max_length=255)
+    description = models.TextField(default="Description de la filière", blank=True, null=True)
+    niveaux = models.ManyToManyField(Niveau, related_name='filiere_niveaux', blank=True)
     date_add = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
     status = models.BooleanField(default=True)
-    
+    slug = models.SlugField(unique=True, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        self.slug = '-'.join((slugify(self.nom), slugify(self.date_add)))
+        super(Filiere, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Filière'
+        verbose_name_plural = 'Filières'
+
+    def __str__(self):
+        return self.nom
+
+class Matiere(models.Model):
+    nom = models.CharField(max_length=255)
+    image = models.ImageField(upload_to="images/matiere/", null=True)
+    description = models.TextField(default="Description du cours")
+    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True, related_name='matieres_filiere')
+    date_add = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True)
+    status = models.BooleanField(default=True)
+    slug = models.SlugField(unique=True, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = '-'.join((slugify(self.nom), slugify(self.date_add)))
+        super(Matiere, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Matière'
+        verbose_name_plural = 'Matières'
+
+    def __str__(self):
+        return self.nom
+
+
+class Classe(models.Model):
+    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True, related_name='classes_filiere')
+    niveau = models.ForeignKey(Niveau, on_delete=models.CASCADE, related_name='classe_niveau')
+    numeroClasse = models.IntegerField()
+    students = models.ManyToManyField(User, related_name='student_classe', blank=True)
+    date_add = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True)
+    status = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'Classe'
         verbose_name_plural = 'Classes'
 
     def __str__(self):
-        return (str(self.niveau.nom)+ " "+ str(self.numeroClasse))
+        return f"{self.niveau.nom} {self.numeroClasse}"
  
 class Chapitre(models.Model):
     

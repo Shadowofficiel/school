@@ -1,0 +1,194 @@
+{% extends 'bases/header_i_chat.html' %}
+
+{% block content %}
+<div class="mdk-drawer-layout__content page">
+    <div data-push data-responsive-width="768px" class="mdk-drawer-layout js-mdk-drawer-layout">
+        <div class="mdk-drawer-layout__content">
+            <div class="app-messages__container d-flex flex-column h-100 pb-4">
+                <div class="navbar navbar-light bg-white navbar-expand-sm navbar-shadow z-1">
+                    <div class="container-fluid flex-wrap px-sm-0">
+                        <div class="nav py-2">
+                            <div class="nav-item align-items-center mr-3">
+                                <div class="d-flex flex-column" style="max-width: 200px; font-size: 15px">
+                                    <strong class="text-body">Chat avec {{ student.first_name }} {{ student.last_name }}</strong>
+                                    <span class="text-muted text-ellipsis">Conversation privée</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-2 flex d-flex align-items-center">
+                            <button data-target="#messages-drawer" class="navbar-toggler d-block d-md-none ml-3 p-0"
+                                data-toggle="sidebar" type="button">
+                                <i class="material-icons">people_outline</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex pt-4" style="position: relative;" data-perfect-scrollbar>
+                    <div class="container-fluid page__container">
+                        <ul class="d-flex flex-column list-unstyled" id="private-chat-log">
+                            {% for message in messages %}
+                            <li class="message d-inline-flex">
+                                <div class="message__body card {% if message.sender == user %}bg-primary text-white ml-auto{% else %}bg-light text-dark mr-auto{% endif %}"
+                                     style="max-width: 70%;">
+                                    <div class="card-body">
+                                        <strong>{% if message.sender == user %}Moi{% else %}{{ message.sender.username }}{% endif %}</strong>
+                                        <span>{{ message.message }}</span>
+                                        <div><small>{{ message.date_add }}</small></div>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="container-fluid page__container">
+                    <form id="private-message-form" class="input-group input-group-merge">
+                        <input type="text" id="private-chat-message-input" class="form-control form-control-appended" autofocus="" required=""
+                            placeholder="Écrire un message...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" id="private-chat-message-submit" type="button">
+                                <i class="material-icons">send</i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="mdk-drawer js-mdk-drawer" data-align="end" id="messages-drawer">
+            <div class="mdk-drawer__content top-0">
+                <div class="sidebar sidebar-right sidebar-light bg-white o-hidden">
+                    <div class="d-flex flex-column h-100">
+                        <div class="flex" data-perfect-scrollbar>
+                            <ul class="list-group list-group-fit mb-3">
+                                <!-- Profil de l'instructeur -->
+                                <li class="list-group-item px-4 py-3 bg-light">
+                                    <a href="#" class="d-flex align-items-center position-relative">
+                                        <span class="avatar avatar-sm mr-3 flex-shrink-0">
+                                            <img src="{{ user.instructor.photo.url|default:'/static/default-avatar.png' }}" alt="Avatar" class="avatar-img rounded-circle">
+                                        </span>
+                                        <span class="flex d-flex flex-column" style="max-width: 175px;">
+                                            <strong class="text-body">{{ user.last_name }} {{ user.first_name }}</strong>
+                                            <span class="text-muted text-ellipsis">Vous (Professeur)</span>
+                                        </span>
+                                    </a>
+                                </li>
+                
+                                <!-- Lien vers le Chat de Classe -->
+                                <li class="list-group-item px-4 py-3 {% if not student_id %}active{% endif %}">
+                                    <a href="{% url 'instructor-messages' classe.id %}" class="d-flex align-items-center position-relative">
+                                        <span class="avatar avatar-sm mr-3 flex-shrink-0">
+                                            <i class="material-icons text-muted">group</i>
+                                        </span>
+                                        <span class="flex d-flex flex-column" style="max-width: 175px;">
+                                            <strong class="text-body">Chat de classe</strong>
+                                        </span>
+                                    </a>
+                                </li>
+                
+                                <!-- Liste des étudiants pour chat privé -->
+                                {% for student in students %}
+                                <li class="list-group-item px-4 py-3 {% if student.user.id == student_id %}active{% endif %}">
+                                    <a href="{% url 'private-chat' student.user.id %}" class="d-flex align-items-center position-relative">
+                                        <span class="avatar avatar-sm mr-3 flex-shrink-0">
+                                            <img src="{{ student.photo.url|default:'/static/default-avatar.png' }}" alt="Avatar" class="avatar-img rounded-circle">
+                                        </span>
+                                        <span class="flex d-flex flex-column text-dark" style="max-width: 175px;">
+                                            <strong>{{ student.user.first_name }} {{ student.user.last_name }}</strong>
+                                        </span>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                                
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    const username = "{{ user.username }}"; // Récupère le nom de l'utilisateur connecté
+    const chatSocket = new WebSocket(
+        `ws://${window.location.host}/ws/private-chat/{{ student.id }}/`
+    );
+
+    // Fonction exécutée à la réception d'un message WebSocket
+    chatSocket.onmessage = function(e) {
+        try {
+            const data = JSON.parse(e.data);
+
+            // Vérifie si le message contient les bonnes données
+            if (data.message && data.sender && data.date_add) {
+                addMessageToChatLog(data.sender, data.message, data.date_add);
+            } else {
+                console.error("Données invalides reçues :", data);
+            }
+        } catch (error) {
+            console.error("Erreur de parsing JSON :", error);
+        }
+    };
+
+    // Fonction appelée lorsque l'utilisateur clique sur "Envoyer"
+    document.getElementById('private-chat-message-submit').onclick = function() {
+        const messageInput = document.getElementById('private-chat-message-input');
+        const message = messageInput.value.trim(); // Supprime les espaces inutiles
+        if (message) {
+            const now = new Date(); // Date locale actuelle
+            chatSocket.send(JSON.stringify({
+                command: 'new_private_message',
+                message: message
+            }));
+
+            // Ajoute immédiatement le message dans la liste avec une date locale
+            addMessageToChatLog(username, message, now.toISOString());
+
+            // Réinitialise le champ de saisie
+            messageInput.value = '';
+        }
+    };
+
+    // Fonction pour ajouter un message au chat log
+    function addMessageToChatLog(sender, message, date) {
+        const chatLog = document.getElementById('private-chat-log');
+
+        // Convertit la date en un format lisible
+        let formattedDate;
+        try {
+            formattedDate = new Date(date).toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+            });
+        } catch (error) {
+            formattedDate = 'Date inconnue';
+            console.error("Erreur lors de la conversion de la date :", error);
+        }
+
+        // Ajoute le message dans la liste avec une vérification des données
+        chatLog.innerHTML += `
+            <li class="message d-inline-flex">
+                <div class="message__body card ${sender === username ? 'bg-primary text-white ml-auto' : 'bg-light text-dark mr-auto'}"
+                     style="max-width: 70%;">
+                    <div class="card-body">
+                        <strong>${sender === username ? 'Moi' : sender}</strong>
+                        <span>${message || 'Message vide'}</span>
+                        <div><small>${formattedDate}</small></div>
+                    </div>
+                </div>
+            </li>
+        `;
+
+        // Scroll automatiquement vers le bas
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+</script>
+{% endblock script %}

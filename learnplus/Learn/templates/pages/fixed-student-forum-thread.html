@@ -1,152 +1,250 @@
-{% extends 'bases/student_header.html'%}
+{% extends 'bases/student_header.html' %}
 {% block content %}
 
-            <div class="page ">
+<div class="page ">
 
-                <div class="container page__container">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'index_student' %}">Accueil</a></li> 
-                        
-                        
-                        {% if forum.cours is not none %}
-                            <li class="breadcrumb-item"><a href="{% url 'forum-lesson' forum.cours.slug %}">Forum</a></li>
-                        {% else %}
-                            <li class="breadcrumb-item"><a href="{% url 'forum' %}">Forum</a></li>
-                        {% endif %}
-                            
-                            
-                        
-                        <li class="breadcrumb-item active">Discussion</li>
-                    </ol>
+    <div class="container page__container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index_student' %}">Accueil</a></li> 
+            {% if forum.cours is not none %}
+                <li class="breadcrumb-item"><a href="{% url 'forum-lesson' forum.cours.slug %}">Forum</a></li>
+            {% else %}
+                <li class="breadcrumb-item"><a href="{% url 'forum' %}">Forum</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">Discussion</li>
+        </ol>
 
-                    <div class="row">
-                        <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-8">
 
-                            <h1 class="h2 mb-2">{{ forum.titre }}</h1>
-                            <p class="text-muted d-flex align-items-center mb-4">
-                                
-                                {% if forum.cours is not none %}
-                                    <a href="{% url 'forum-lesson' forum.cours.slug %}" class="mr-3">Retour</a>
-                                {% else %}
-                                    <a href="{% url 'forum'  %}" class="mr-3">Retour</a>
-                                {% endif %}
-                                    
-                                
+                <h1 class="h2 mb-2">{{ forum.titre }}</h1>
+                <p class="text-muted d-flex align-items-center mb-4">
+                    {% if forum.cours is not none %}
+                        <a href="{% url 'forum-lesson' forum.cours.slug %}" class="mr-3">Retour</a>
+                    {% else %}
+                        <a href="{% url 'forum' %}" class="mr-3">Retour</a>
+                    {% endif %}
+                </p>
+                   <!-- Bouton de suppression du forum -->
+                   {% if forum.user == request.user %}
+                   <div class="mb-4">
+                       <button class="btn btn-danger btn-sm delete-forum" data-id="{{ forum.id }}">Supprimer ce forum</button>
+                   </div>
+                   {% endif %}
+   
+                <div class="card card-body">
+                    <div class="d-flex">
+                        <a href="#" class="avatar mr-3">
+                            {% if forum.user.student_user %}
+                                <img src="{{ forum.user.student_user.photo.url }}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
+                            {% elif forum.user.instructor %}
+                                <img src="{{ forum.user.instructor.photo.url }}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
+                            {% endif %}
+                        </a>
+                        <div class="flex">
+                            <p class="d-flex align-items-center mb-2">
+                                <a href="#" class="text-body mr-2"><strong>{{ forum.user.last_name }} {{ forum.user.first_name }}</strong></a>
+                                <small class="text-muted">{{ forum.date_add }}</small>
                             </p>
-
-                            <div class="card card-body">
-                                <div class="d-flex">
-                                    <a href="#" class="avatar mr-3">
-                                        {% if forum.user.student_user.get_u_type  %}
-                                        <img src="{{ forum.user.student_user.photo.url}}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
-                                        {% elif forum.user.instructor.get_u_type  %}
-                                        <img src="{{ forum.user.instructor.photo.url}}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
-                                        {% endif %}
-                                    </a>
-                                    <div class="flex">
-                                        <p class="d-flex align-items-center mb-2">
-                                            <a href="#" class="text-body mr-2"><strong>{{ forum.user.last_name }} {{ forum.user.first_name }}</strong></a>
-                                            <small class="text-muted">{{ forum.date_add }}</small>
-                                        </p>
-                                        <p>{{ forum.question }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex mb-4">
-                                <a href="fixed-student-profile.html" class="avatar mr-3">
-                                    <img src="{{ user.student_user.photo.url}}" alt="people" class="avatar-img rounded-circle">
-                                </a>
-                                <div class="flex">
-                                    <div class="form-group">
-                                        <label for="comment" class="form-label">Avez-vous une reponse??</label>
-                                        <textarea class="form-control" name="comment" id="comment" rows="3" placeholder="Entrer votre reponse"></textarea>
-                                    </div>
-                                    <button class="btn btn-success">Je reponds</button>
-                                </div>
-                            </div>
-                            <div class="pt-3">
-                                <h4>{{ forum.sujet_reponse.count}} Reponse(s)</h4>
-                                
-                                {% for i in forum.sujet_reponse.all %}
-                                    
-                                <div class="d-flex ml-sm-32pt mt-3 border rounded p-3 bg-light mb-3">
-                                    <a href="#" class="avatar avatar-xs mr-3">
-                                        {% if i.user.student_user.get_u_type  %}
-                                        <img src="{{ forum.user.student_user.photo.url}}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
-                                        {% elif i.user.instructor.get_u_type  %}
-                                        <img src="{{ forum.user.instructor.photo.url}}" alt="{{ forum.user.last_name }}" class="avatar-img rounded-circle">
-                                        {% endif %}
-                                    </a>
-                                    <div class="flex">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="text-body"><strong>{{ i.user.last_name}} {{ i.user.first_name}}</strong></a>
-                                            <small class="ml-auto text-muted">{{ i.date_add }}</small>
-                                        </div>
-                                        <p class="mt-1 mb-0 text-black-70">{{ i.reponse }}</p>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                                    
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-
-                            <h4>Autres sujets</h4>
-                            <p class="text-black-70">Certains sujets qui pourraient vous aider.</p>
-
-
-
-                            {% for i in forum.cours.cours_forum.all %}
-                                
-                                {% if i.id != forum.id %}
-                                    
-                                <li class="list-group-item forum-thread">
-                                    <div class="media align-items-center">
-                                        <div class="media-left">
-                                            <div class="forum-icon-wrapper">
-                                                <a href="{% url 'forum-thread' i.slug %}" class="forum-thread-icon">
-                                                    <i class="material-icons">description</i>
-                                                </a>
-                                                <a href="#" class="forum-thread-user">
-                                                    {% if i.user.student_user.get_u_type %}
-                                                    <img src="{{ i.user.student_user.photo.url }}" alt="" width="20" class="rounded-circle">
-                                                    {% elif i.user.instructor.get_u_type %}
-                                                    <img src="{{ i.user.instructor.photo.url }}" alt="" width="20" class="rounded-circle">
-                                                    {% endif %}
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="media-body">
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="text-body"><strong>{{ i.user.last_name }} {{ i.user.first_name }}</strong></a>
-                                                <small class="ml-auto text-muted">{{ i.date_add }}</small>
-                                            </div>
-                                            <a class="text-black-70" href="{% url 'forum-thread' i.slug %}">{{ i.titre }}</a>
-                                        </div>
-                                    </div>
-                                </li>
-                                {% else %}
-                                <div class="alert alert-info" role="alert">
-                                    Il n'y a pas d'autres sujet 😣!!!
-                                </div>
-
-                                {% endif %}
-                                    
-                            {% endfor %}
-
+                            <p>{{ forum.question }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="container page__container">
-                    <div class="footer">
-                        Copyright &copy; 2016 - <a href="http://themeforest.net/item/learnplus-learning-management-application/15287372?ref=mosaicpro">Purchase LearnPlus</a>
+                <!-- Formulaire de réponse -->
+                <div class="d-flex mb-4">
+                    <a href="#" class="avatar mr-3">
+                        <img src="{{ user.student_user.photo.url }}" alt="profile" class="avatar-img rounded-circle">
+                    </a>
+                    <div class="flex">
+                        <form id="reply-form" method="POST" action="{% url 'forum-post-reply' forum.slug %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="comment" class="form-label">Avez-vous une réponse ?</label>
+                                <textarea class="form-control" name="comment" id="comment" rows="3" placeholder="Entrez votre réponse"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">Je réponds</button>
+                        </form>
+                        <div id="reply-message" class="mt-2"></div>
                     </div>
+                </div>
+
+                <!-- Liste des réponses -->
+                <div class="pt-3">
+                    <h4>{{ forum.sujet_reponse.count }} Réponse(s)</h4>
+                    {% for i in forum.sujet_reponse.all %}
+                    <div class="d-flex ml-sm-32pt mt-3 border rounded p-3 bg-light mb-3">
+                        <a href="#" class="avatar avatar-xs mr-3">
+                            {% if i.user.student_user %}
+                                <img src="{{ i.user.student_user.photo.url }}" alt="{{ i.user.last_name }}" class="avatar-img rounded-circle">
+                            {% elif i.user.instructor %}
+                                <img src="{{ i.user.instructor.photo.url }}" alt="{{ i.user.last_name }}" class="avatar-img rounded-circle">
+                            {% endif %}
+                        </a>
+                        <div class="flex">
+                            <div class="d-flex align-items-center">
+                                <a href="#" class="text-body"><strong>{{ i.user.last_name }} {{ i.user.first_name }}</strong></a>
+                                <small class="ml-auto text-muted">{{ i.date_add }}</small>
+                            </div>
+                            <p class="mt-1 mb-0 text-black-70">{{ i.reponse }}</p>
+                            {% if i.user == request.user %}
+                            <button class="btn btn-danger btn-sm mt-2 delete-response" data-id="{{ i.id }}">Supprimer</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
+            <!-- Autres sujets -->
+            <div class="col-md-4">
+                <h4>Autres sujets</h4>
+                <p class="text-black-70">Certains sujets qui pourraient vous aider.</p>
+                <ul class="list-group">
+                    {% for i in forum.cours.cours_forum.all %}
+                        {% if i.id != forum.id %}
+                        <li class="list-group-item forum-thread">
+                            <div class="media align-items-center">
+                                <div class="media-left">
+                                    <div class="forum-icon-wrapper">
+                                        <a href="{% url 'forum-thread' i.slug %}" class="forum-thread-icon">
+                                            <i class="material-icons">description</i>
+                                        </a>
+                                        <a href="#" class="forum-thread-user">
+                                            {% if i.user.student_user %}
+                                                <img src="{{ i.user.student_user.photo.url }}" alt="" width="20" class="rounded-circle">
+                                            {% elif i.user.instructor %}
+                                                <img src="{{ i.user.instructor.photo.url }}" alt="" width="20" class="rounded-circle">
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="media-body">
+                                    <div class="d-flex align-items-center">
+                                        <a href="#" class="text-body"><strong>{{ i.user.last_name }} {{ i.user.first_name }}</strong></a>
+                                        <small class="ml-auto text-muted">{{ i.date_add }}</small>
+                                    </div>
+                                    <a class="text-black-70" href="{% url 'forum-thread' i.slug %}">{{ i.titre }}</a>
+                                </div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <div class="alert alert-info" role="alert">
+                            Il n'y a pas d'autres sujets 😣!!!
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 
+    <div class="container page__container">
+        <div class="footer">
+            Copyright &copy; 2016 - <a href="http://themeforest.net/item/learnplus-learning-management-application/15287372?ref=mosaicpro">Purchase LearnPlus</a>
+        </div>
+    </div>
+</div>
 
+{% endblock content %}
 
-    {% endblock content %}
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    // Gestion de la suppression du forum
+    const deleteForumButton = document.querySelector('.delete-forum');
+    if (deleteForumButton) {
+        deleteForumButton.addEventListener('click', function () {
+            const forumId = this.getAttribute('data-id');
+            const csrfToken = "{{ csrf_token }}";
+
+            if (confirm("Êtes-vous sûr de vouloir supprimer ce forum ?")) {
+                fetch(`{% url 'delete-forum' 0 %}`.replace('0', forumId), {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.href = "{% url 'forum' %}";
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur:", error);
+                    alert("Une erreur est survenue.");
+                });
+            }
+        });
+    }
+});
+document.addEventListener('DOMContentLoaded', function () {
+    // Gestion de la soumission des réponses
+    const replyForm = document.getElementById('reply-form');
+    replyForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(replyForm);
+        const url = replyForm.action;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const messageDiv = document.getElementById('reply-message');
+            if (data.success) {
+                messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                replyForm.reset();
+                setTimeout(() => location.reload(), 1000); // Recharger la page
+            } else {
+                messageDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            const messageDiv = document.getElementById('reply-message');
+            messageDiv.innerHTML = `<div class="alert alert-danger">Erreur de soumission.</div>`;
+        });
+    });
+
+    // Gestion de la suppression des réponses
+    const deleteButtons = document.querySelectorAll('.delete-response');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const responseId = this.getAttribute('data-id');
+            const csrfToken = "{{ csrf_token }}";
+
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette réponse ?")) {
+                fetch(`{% url 'delete-response' 0 %}`.replace('0', responseId), {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        this.closest('.d-flex').remove(); // Supprime la réponse du DOM
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur:", error);
+                    alert("Une erreur est survenue.");
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock script %}

@@ -1,0 +1,25 @@
+{% extends 'bases/header_instructor.html' %}
+
+{% block content %}
+<h2>Créer un Forum</h2>
+<form method="POST">
+    {% csrf_token %}
+    <div>
+        <label for="titre">Titre</label>
+        <input type="text" id="titre" name="titre" required>
+    </div>
+    <div>
+        <label for="question">Question</label>
+        <textarea id="question" name="question" rows="5" required></textarea>
+    </div>
+    <div>
+        <label for="cours_id">Cours</label>
+        <select id="cours_id" name="cours_id" required>
+            {% for cours in cours %}
+            <option value="{{ cours.id }}">{{ cours.titre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit">Créer</button>
+</form>
+{% endblock %}

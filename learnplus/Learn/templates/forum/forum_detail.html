@@ -1,0 +1,64 @@
+{% extends 'bases/header_instructor.html' %}
+
+{% block content %}
+<div class="mdk-drawer-layout__content page">
+    <div class="container-fluid page__container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'instructor-forum' %}">Forum</a></li>
+            <li class="breadcrumb-item active">{{ forum.titre }}</li>
+        </ol>
+
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">{{ forum.titre }}</h1>
+                <p class="text-muted mb-4">{{ forum.question }}</p>
+
+                {% if user == forum.user %}
+                <form method="POST" action="{% url 'delete-forum' forum.slug %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger mb-4">Supprimer le forum</button>
+                </form>
+                {% endif %}
+
+                <div class="card card-body">
+                    <h4>{{ forum.sujet_reponse.count }} Réponse(s)</h4>
+                    {% for reponse in forum.sujet_reponse.all %}
+                    <div class="d-flex mb-3">
+                        <div class="mr-3">
+                            {% if reponse.user.student_user.get_u_type %}
+                            <img src="{{ reponse.user.student_user.photo.url }}" alt="{{ reponse.user.last_name }}" class="avatar-img rounded-circle" width="50">
+                            {% elif reponse.user.instructor.get_u_type %}
+                            <img src="{{ reponse.user.instructor.photo.url }}" alt="{{ reponse.user.last_name }}" class="avatar-img rounded-circle" width="50">
+                            {% endif %}
+                        </div>
+                        <div>
+                            <strong>{{ reponse.user.last_name }} {{ reponse.user.first_name }}</strong>
+                            <p>{{ reponse.reponse }}</p>
+                            <small class="text-muted">{{ reponse.date_add }}</small>
+
+                            {% if user == reponse.user %}
+                            <form method="POST" action="{% url 'delete-response' reponse.id %}" class="mt-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>Aucune réponse pour le moment.</p>
+                    {% endfor %}
+                </div>
+
+                <form method="POST" action="{% url 'add-response' forum.slug %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea name="reponse" rows="3" class="form-control" placeholder="Écrivez votre réponse ici..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Soumettre une réponse</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

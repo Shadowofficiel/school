@@ -34,10 +34,29 @@
                 <div class="flex pt-4" style="position: relative;" data-perfect-scrollbar>
                     <div class="container-fluid page__container">
                         <ul class="d-flex flex-column list-unstyled" id="chat-log">
-
-
-
+                            {% for message in messages %}
+                            <li class="message d-inline-flex">
+                                {% if message.auteur.username == user.username %}
+                                <div class="message__body card bg-info text-white">
+                                    <div class="card-body">
+                                        <strong>Moi</strong>
+                                        <p>{{ message.message }}</p>
+                                        <small>{{ message.date_add|date:"Y-m-d H:i:s" }}</small>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="message__body card">
+                                    <div class="card-body">
+                                        <strong>{{ message.auteur.username }}</strong>
+                                        <p>{{ message.message }}</p>
+                                        <small>{{ message.date_add|date:"Y-m-d H:i:s" }}</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
                         </ul>
+                        
                     </div>
                 </div>
                 <div class="container-fluid page__container">
@@ -72,8 +91,8 @@
                                     <a href="#" class="d-flex align-items-center position-relative">
                                         <span class="avatar avatar-sm mr-3 flex-shrink-0">
 
-                                            <img src="{{ user.instructor.photo.url}}" alt="Avatar"
-                                                class="avatar-img rounded-circle">
+                                            <img src="{{ user.instructor.photo.url|default:'/static/default-avatar.png' }}" alt="Avatar" class="avatar-img rounded-circle">
+
 
                                         </span>
                                         <span class="flex d-flex flex-column" style="max-width: 175px;">
@@ -88,22 +107,18 @@
 
                                 
                                 {% for i in info_classe.student_classe.all %}
-                                    
                                 <li class="list-group-item px-4 py-3">
-                                    <a href="#" class="d-flex align-items-center position-relative">
+                                    <a href="{% url 'private-chat' i.user.id %}" class="d-flex align-items-center position-relative">
                                         <span class="avatar avatar-sm mr-3 flex-shrink-0">
-
-                                            <img src="{{ i.photo.url }}" alt="Avatar"
-                                                class="avatar-img rounded-circle">
-
+                                            <img src="{{ i.photo.url|default:'/static/default-avatar.png' }}" alt="Avatar" class="avatar-img rounded-circle">
                                         </span>
                                         <span class="flex d-flex flex-column" style="max-width: 175px;">
-                                            <strong class="text-body">{{ i.user.last_name}} {{ i.user.first_name}}</strong>
-
+                                            <strong class="text-body">{{ i.user.last_name }} {{ i.user.first_name }}</strong>
                                         </span>
                                     </a>
                                 </li>
                                 {% endfor %}
+                                
                             </ul>
                         </div>
                     </div>
@@ -124,8 +139,8 @@
 <!-- Messages App -->
 <script src="/static/assets/js/reconnecting-websocket.js"></script>
 <script>
-    var classe = {{ classe_json }};
-    var username = {{ username }};
+    var classe = "{{ classe_json }}";
+    var username = "{{ username }}";
 
     console.log(classe)
 

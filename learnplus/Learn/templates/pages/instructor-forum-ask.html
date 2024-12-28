@@ -1,91 +1,68 @@
 {% extends 'bases/header_instructor.html' %}
+
 {% block content %}
+<div class="mdk-drawer-layout__content page">
+    <div class="container-fluid page__container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'instructor-forum' %}">Forum</a></li>
+            <li class="breadcrumb-item active">Poser une question</li>
+        </ol>
+        <h1 class="h2">Poser une question</h1>
 
-        <!-- Header Layout Content -->
-                <div class="mdk-drawer-layout__content page ">
+        <form method="POST" action="{% url 'instructor_post_forum' %}">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group row">
+                        <label for="titre" class="col-md-3 col-form-label">Titre de la question :</label>
+                        <div class="col-md-9">
+                            <input id="titre" name="titre" type="text" placeholder="Entrez le titre de votre question" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="container-fluid page__container">
-                        <div class="row m-0">
-                            <div class="col-lg container-fluid page__container">
-                                <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                                    <li class="breadcrumb-item"><a href="{% url 'forum' %}">Forum</a></li>
-                                    <li class="breadcrumb-item active">Ask Question</li>
-                                </ol>
-                                <h1 class="h2">Ask Question</h1>
-
-
-
-
-                                <form action="#">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="form-group m-0" role="group" aria-labelledby="label-question">
-                                                <div class="form-row align-items-center">
-                                                    <label id="label-question" for="question" class="col-md-3 col-form-label form-label">Question title</label>
-                                                    <div class="col-md-9">
-                                                        <input id="question" type="text" placeholder="Your question ..." value="Angular HttpClientModule" class="form-control">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="card">
-                                        <div class="list-group list-group-fit">
-                                            <div class="list-group-item">
-                                                <div role="group" aria-labelledby="label-question" class="m-0 form-group">
-                                                    <div class="form-row">
-                                                        <label id="label-question" for="question" class="col-md-3 col-form-label form-label">Question details</label>
-                                                        <div class="col-md-9">
-                                                            <textarea id="question" placeholder="Describe your question in detail ..." rows="4" class="form-control"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="list-group-item">
-                                                <div class="form-group m-0" role="group" aria-labelledby="label-topic">
-                                                    <div class="form-row align-items-center">
-                                                        <label id="label-topic" for="topic" class="col-md-3 col-form-label form-label">Topic</label>
-                                                        <div class="col-md-9">
-                                                            <select id="topic" class="form-control custom-select w-auto">
-                                                                <option value="JavaScript">JavaScript</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="list-group-item">
-                                                <div class="custom-control custom-checkbox custom-control-inline">
-                                                    <input id="notify" type="checkbox" class="custom-control-input" checked="">
-                                                    <label for="notify" class="custom-control-label">Notify me on email when someone replies to my question</label>
-                                                </div>
-                                                <small id="description-notify" class="form-text text-muted">If unchecked, you'll still recieve notifications on our website.</small>
-                                            </div>
-                                            <div class="list-group-item">
-                                                <button type="button" class="btn btn-success">Post Question</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-
-                            </div>
-                            <div id="page-nav" class="col-lg-auto page-nav">
-                                <div data-perfect-scrollbar data-perfect-scrollbar-wheel-propagation="true">
-                                    <div class="page-section pt-lg-32pt">
-                                        <div class="nav page-nav__menu">
-                                            <a href="javascript:void(0)" class="nav-link active">Before you post</a>
-                                        </div>
-                                        <div class="page-nav__content">
-                                            <p class="text-black-70">There may be other students who have asked the same question before.</p>
-                                            <p class="text-black-70">You should do a quick search first to make sure your question is unique.</p>
-                                        </div>
-                                    </div>
-                                </div>
+            <div class="card">
+                <div class="list-group list-group-fit">
+                    <div class="list-group-item">
+                        <div class="form-group row">
+                            <label for="question" class="col-md-3 col-form-label">Détails de la question :</label>
+                            <div class="col-md-9">
+                                <textarea id="question" name="question" rows="4" class="form-control" placeholder="Décrivez votre question en détail..." required></textarea>
                             </div>
                         </div>
                     </div>
 
-                </div>
+                    <!-- Dropdown pour la sélection des cours -->
+                    <div class="list-group-item">
+                        <div class="form-group row">
+                            <label for="cours" class="col-md-3 col-form-label">Cours associé :</label>
+                            <div class="col-md-9">
+                                <select id="cours" name="cours" class="form-control custom-select">
+                                    <option value="">Général</option>
+                                    {% for cours in cours_list %}
+                                        <option value="{{ cours.id }}">{{ cours.titre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-    {% endblock content %}
+                    <!-- Option pour recevoir des notifications -->
+                    <div class="list-group-item">
+                        <div class="custom-control custom-checkbox">
+                            <input id="notify" name="notify" type="checkbox" class="custom-control-input" checked>
+                            <label for="notify" class="custom-control-label">Recevoir une notification par email en cas de réponse</label>
+                        </div>
+                    </div>
+
+                    <div class="list-group-item">
+                        <button type="submit" class="btn btn-success">Poster la question</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
